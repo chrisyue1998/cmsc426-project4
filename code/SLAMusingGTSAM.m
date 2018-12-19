@@ -1,7 +1,7 @@
 function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSize, qIMUToC, TIMUToC,...
                                                 IMU, Mode)
     % For Input and Output specifications refer to the project pdf
-
+    %% Pose Estimation
     import gtsam.*
     % Refer to Factor Graphs and GTSAM Introduction
     % https://research.cc.gatech.edu/borg/sites/edu.borg/files/downloads/gtsam.pdf
@@ -56,7 +56,7 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
     [U, S, V] = svd([h_1 h_2 cross(h_1, h_2)]);
     R = U * [1 0 0; 0 1 0; 0 0 det(U * V')] * V';
     T = h_3 / norm(h_1);
-    pose = [R T]
+    pose = [R T];
     
     world_frame_coords = [10, 0, 0, TagSize, 0, TagSize, TagSize, 0, TagSize];
     %imshow(frames{1});
@@ -82,5 +82,45 @@ function [LandMarksComputed, AllPosesComputed] = SLAMusingGTSAM(DetAll, K, TagSi
             [cur_world_coords(2, :) cur_world_coords(2, 1)], 'b-', 'LineWidth', 2);
     end
     hold off;
-    
+
+    %% Factor Graph Section
+%     x = cell(length(DetAll), 1);
+%     for i = 1:length(DetAll)
+%         x{i} = symbol('x', i);
+%     end
+%     
+%     % Variables to store landmark points
+%     all_frames_landmarks = cell(length(DetAll), 1);
+%     for f = length(DetAll)
+%         cur_frame_landmarks = sortrows(frame_one_detections, 1);
+%         l = cell(length(cur_frame_landmarks),1);
+%         point_count = 0
+%         for i = 1:length(cur_frame_landmarks(:, 1))
+%             for j = 1:length(cur_frame_landmarks(i, 2:length(A)))
+%                 point_count = point_count + 1;
+%                 l{point_count} = symbol('lp', cur_frame_landmarks(point_count, 1));
+%             end
+%         end
+%         all_frames_landmarks{f} = l;
+%     end
+% 
+%     graph = NonlinearFactorGraph;
+% 
+%     % Add prior
+%     priorMean = Pose2(0.0, 0.0, 0.0); % prior at origin
+%     priorNoise = noiseModel.Diagonal.Sigmas([0.3; 0.3; 0.1])
+%     graph.add(PriorFactorPose2(x{1}, priorMean, priorNoise));
+%     
+%     % Add odometry between steps
+%     odometryNoise = noiseModel.Diagonal.Sigmas([0.2 0.2 0.1]);
+%     for i = 1:length(x) - 1
+%         graph.add(BetweenFactorPose2(x{i}, x{i+1}, eye(3), odometryNoise));
+%     end
+%     
+%     % Add projection factor between pose and all landmark points
+%     for f = 1:length(all_frames_landmarks)
+%         for p = 1:length(all_frames_landmarks{f})
+%             graph.add(Point2) 
+%         end
+%     end
 end
